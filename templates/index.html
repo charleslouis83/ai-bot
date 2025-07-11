@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Crypto Dashboard</title>
+</head>
+<body>
+<h1>Top Coins</h1>
+<table id="coin-table" border="1">
+  <thead>
+    <tr><th>Coin</th><th>Confidence</th><th>RSI</th><th>Reversal?</th><th>Backtest</th></tr>
+  </thead>
+  <tbody>
+    {% for coin in coins %}
+    <tr data-coin="{{ coin.name }}">
+      <td>{{ coin.name }}</td>
+      <td class="confidence">{{ coin.confidence }}</td>
+      <td class="rsi">{{ indicators[coin.name].rsi }}</td>
+      <td class="reversal">{{ indicators[coin.name].reversal }}</td>
+      <td><button class="backtest">Run</button></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+function refreshData() {
+  fetch('/update').then(r => r.json()).then(data => {
+    data.coins.forEach(c => {
+      const row = document.querySelector('tr[data-coin="' + c.name + '"]');
+      if(row){
+        row.querySelector('.confidence').textContent = c.confidence;
+        row.querySelector('.rsi').textContent = data.indicators[c.name].rsi;
+        row.querySelector('.reversal').textContent = data.indicators[c.name].reversal;
+      }
+    });
+  });
+}
+setInterval(refreshData, 5000);
+
+document.querySelectorAll('.backtest').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const coin = this.closest('tr').dataset.coin;
+    fetch('/backtest', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({coin})
+    }).then(r => r.json()).then(res => alert(res.message));
+  });
+});
+</script>
+</body>
+</html>
