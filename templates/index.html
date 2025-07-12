@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+    <title>Meme Coin Platform</title>
+    <meta charset="utf-8" />
+</head>
+<body>
+<h1>Meme Coin Platform</h1>
+<button onclick="createCoin()">Create Coin From Latest News</button>
+<ul id="coin-list">
+    {% for coin in coins %}
+    <li>{{ coin.name }} ({{ coin.symbol }})
+        <br><img src="{{ coin.image }}" alt="image" width="100">
+        <p>From article: <a href="{{ coin.article }}">link</a></p>
+    </li>
+    {% endfor %}
+</ul>
+<script>
+function createCoin() {
+    fetch('/create', {method: 'POST'})
+        .then(res => res.json())
+        .then(coin => {
+            const li = document.createElement('li');
+            li.innerHTML = `${coin.name} (${coin.symbol})<br><img src="${coin.image}" width="100"><p>From article: <a href="${coin.article}">link</a></p>`;
+            document.getElementById('coin-list').appendChild(li);
+        });
+}
+</script>
+</body>
+</html>
